@@ -5,6 +5,7 @@
 
 export * from './active-cell-manager';
 export * from './components';
+export * from './cell-diff';
 export * from './context';
 export * from './icons';
 export * from './input-model';

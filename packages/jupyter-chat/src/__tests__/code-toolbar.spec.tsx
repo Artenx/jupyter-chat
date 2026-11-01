@@ -26,6 +26,10 @@ function createMockActiveCellManager(available = false): IActiveCellManager {
     getContent: () => null,
     insertAbove: jest.fn(),
     insertBelow: jest.fn(),
+    registerReplaceHandler: jest.fn(() => ({
+      dispose: jest.fn(),
+      isDisposed: false
+    })),
     replace: jest.fn()
   };
 }

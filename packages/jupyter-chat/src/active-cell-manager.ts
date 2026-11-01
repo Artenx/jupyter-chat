@@ -6,8 +6,13 @@
 import { JupyterFrontEnd, LabShell } from '@jupyterlab/application';
 import { Cell, ICellModel } from '@jupyterlab/cells';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import { INotebookTracker, NotebookActions } from '@jupyterlab/notebook';
+import {
+  INotebookTracker,
+  NotebookActions,
+  type NotebookPanel
+} from '@jupyterlab/notebook';
 import { IError as CellError } from '@jupyterlab/nbformat';
+import { DisposableDelegate, type IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 
 type CellContent = {
@@ -26,6 +31,18 @@ type CellWithErrorContent = {
     traceback: string[];
   };
 };
+
+/**
+ * A handler may intercept a chat code-block replacement. Returning `true`
+ * means the request was handled; returning `false` lets the default replacement
+ * proceed. The active cell and panel are captured before the async handler runs
+ * so an extension can safely review the exact target.
+ */
+export type CellReplacementHandler = (
+  content: string,
+  activeCell: Cell<ICellModel>,
+  notebookPanel: NotebookPanel
+) => boolean | Promise<boolean>;
 
 /**
  * The active cell interface.
@@ -65,6 +82,11 @@ export interface IActiveCellManager {
    * Inserts `content` in a new cell below the active cell.
    */
   insertBelow(content: string): void;
+  /**
+   * Register a handler that can intercept active-cell replacements initiated
+   * from a chat code-block toolbar.
+   */
+  registerReplaceHandler?(handler: CellReplacementHandler): IDisposable;
   /**
    * Replaces the contents of the active cell.
    */
@@ -217,6 +239,16 @@ export class ActiveCellManager implements IActiveCellManager {
   }
 
   /**
+   * Register a handler that can intercept chat code-block replacements.
+   */
+  registerReplaceHandler(handler: CellReplacementHandler): IDisposable {
+    this._replaceHandlers.add(handler);
+    return new DisposableDelegate(() => {
+      this._replaceHandlers.delete(handler);
+    });
+  }
+
+  /**
    * Replaces the contents of the active cell.
    */
   async replace(content: string): Promise<void> {
@@ -233,6 +265,15 @@ export class ActiveCellManager implements IActiveCellManager {
 
     // wait for editor to be ready
     await activeCell.ready;
+
+    // Extensions such as Jupyter AI can preview the replacement before it is
+    // committed. Handlers run in reverse registration order so a later,
+    // app-specific handler can take precedence over an earlier one.
+    for (const handler of [...this._replaceHandlers].reverse()) {
+      if (await handler(content, activeCell, notebookPanel)) {
+        return;
+      }
+    }
 
     // replace the content of the active cell
     /**
@@ -326,4 +367,5 @@ export class ActiveCellManager implements IActiveCellManager {
   private _activeCellError: CellError | null = null;
   private _availabilityChanged = new Signal<this, boolean>(this);
   private _activeCellErrorChanged = new Signal<this, CellError | null>(this);
+  private _replaceHandlers = new Set<CellReplacementHandler>();
 }

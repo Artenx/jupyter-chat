@@ -79,6 +79,7 @@ import {
 import { chatCommandRegistryPlugin } from './chat-commands/plugins';
 import { emojiCommandsPlugin } from './chat-commands/providers/emoji';
 import { mentionCommandsPlugin } from './chat-commands/providers/user-mention';
+import cellCodeReview from './cell-code-review';
 
 const FACTORY = 'Chat';
 const CHAT_LIST_UPDATE_INTERVAL = 2000;
@@ -1553,6 +1554,7 @@ export default [
   chatPanel,
   chatToolbarFactoryPlugin,
   chatTracker,
+  cellCodeReview,
   docFactories,
   footerRegistry,
   inputToolbarFactory,

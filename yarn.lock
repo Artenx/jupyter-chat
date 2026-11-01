@@ -8645,6 +8645,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "jupyterlab-chat-extension@workspace:packages/jupyterlab-chat-extension"
   dependencies:
+    "@codemirror/state": ^6.5.4
+    "@codemirror/view": ^6.39.14
     "@jupyter-notebook/application": ^7.5.0
     "@jupyter/builder": ^1.2.0
     "@jupyter/collaborative-drive": ^4.4.0 || ^5.0.0

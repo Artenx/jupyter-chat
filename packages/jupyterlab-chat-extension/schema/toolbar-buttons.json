@@ -1,0 +1,27 @@
+{
+  "title": "jupyterlab-chat-extension",
+  "description": "Cell toolbar actions for reviewing code replacements from chat.",
+  "type": "object",
+  "properties": {
+    "toolbar": {
+      "type": "array",
+      "default": []
+    }
+  },
+  "additionalProperties": false,
+  "jupyter.lab.toolbars": {
+    "Cell": [
+      {
+        "name": "accept-cell-code",
+        "command": "toolbar-button:chat-accept-cell-code",
+        "rank": 1
+      },
+      {
+        "name": "reject-cell-code",
+        "command": "toolbar-button:chat-reject-cell-code",
+        "rank": 2
+      }
+    ],
+    "Notebook": []
+  }
+}
