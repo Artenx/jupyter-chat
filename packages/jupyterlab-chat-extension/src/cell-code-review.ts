@@ -41,6 +41,7 @@ type PendingCellReview = {
 };
 
 type ReviewCell = {
+  node: HTMLElement;
   model: {
     id: string;
     type: string;
