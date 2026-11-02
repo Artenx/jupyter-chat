@@ -149,11 +149,6 @@ const cellCodeReview: JupyterFrontEndPlugin<void> = {
     const pending = new Map<string, PendingCellReview>();
     const compartments = new Map<string, Compartment>();
 
-    const notifyToolbar = () => {
-      app.commands.notifyCommandChanged(ACCEPT_CELL_CODE);
-      app.commands.notifyCommandChanged(REJECT_CELL_CODE);
-    };
-
     const isActiveCellPending = (): boolean => {
       const panel = notebookTracker.currentWidget;
       const cell = notebookTracker.activeCell;
@@ -201,6 +196,76 @@ const cellCodeReview: JupyterFrontEndPlugin<void> = {
       compartments.delete(key);
     };
 
+    const settleReview = (
+      panel: NotebookPanel,
+      cellId: string,
+      accept: boolean
+    ): void => {
+      const review = pending.get(cellKey(panel, cellId));
+      if (!review) {
+        return;
+      }
+      const cell = cellById(panel, cellId);
+      if (!cell) {
+        return;
+      }
+      clearCellDiff(panel, cellId);
+      cell.model.sharedModel.setSource(
+        accept ? review.replacementSource : review.originalSource
+      );
+      pending.delete(cellKey(panel, cellId));
+      removeReviewBar(panel, cellId);
+    };
+
+    const reviewBars = new Map<string, HTMLElement>();
+
+    const removeReviewBar = (panel: NotebookPanel, cellId: string): void => {
+      const bar = reviewBars.get(cellKey(panel, cellId));
+      if (bar) {
+        bar.remove();
+        reviewBars.delete(cellKey(panel, cellId));
+      }
+    };
+
+    const attachReviewBar = (panel: NotebookPanel, cellId: string): void => {
+      const cell = cellById(panel, cellId);
+      if (!cell) {
+        return;
+      }
+      removeReviewBar(panel, cellId);
+      const bar = document.createElement('div');
+      bar.className = 'jp-chat-cell-review-bar';
+      const makeButton = (
+        className: string,
+        title: string,
+        accept: boolean
+      ): HTMLButtonElement => {
+        const button = document.createElement('button');
+        button.className = className;
+        button.title = title;
+        button.innerHTML = accept
+          ? '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>'
+          : '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+        button.addEventListener('click', (event: MouseEvent) => {
+          event.stopPropagation();
+          settleReview(panel, cellId, accept);
+        });
+        return button;
+      };
+      bar.appendChild(
+        makeButton('jp-chat-cell-review-bar-accept', '接受本次代码替换', true)
+      );
+      bar.appendChild(
+        makeButton(
+          'jp-chat-cell-review-bar-reject',
+          '还原为替换前的代码',
+          false
+        )
+      );
+      cell.node.appendChild(bar);
+      reviewBars.set(cellKey(panel, cellId), bar);
+    };
+
     const previewReplacement: CellReplacementHandler = async (
       content,
       activeCell,
@@ -220,7 +285,7 @@ const cellCodeReview: JupyterFrontEndPlugin<void> = {
           clearCellDiff(panel, activeCell.model.id);
           activeCell.model.sharedModel.setSource(originalSource);
           pending.delete(key);
-          notifyToolbar();
+          removeReviewBar(panel, activeCell.model.id);
         }
         return true;
       }
@@ -245,7 +310,7 @@ const cellCodeReview: JupyterFrontEndPlugin<void> = {
         replacementSource: content
       });
       activeCell.model.sharedModel.setSource(cellDiffSource(lines));
-      notifyToolbar();
+      attachReviewBar(panel, activeCell.model.id);
       return true;
     };
 
@@ -257,19 +322,7 @@ const cellCodeReview: JupyterFrontEndPlugin<void> = {
       if (!panel || !cell || cell.model.type !== 'code') {
         return;
       }
-
-      const key = cellKey(panel, cell.model.id);
-      const review = pending.get(key);
-      if (!review) {
-        return;
-      }
-
-      clearCellDiff(panel, review.cellId);
-      cell.model.sharedModel.setSource(
-        accept ? review.replacementSource : review.originalSource
-      );
-      pending.delete(key);
-      notifyToolbar();
+      settleReview(panel, cell.model.id, accept);
     };
 
     app.commands.addCommand(ACCEPT_CELL_CODE, {
@@ -291,9 +344,6 @@ const cellCodeReview: JupyterFrontEndPlugin<void> = {
       execute: () => settleActiveReview(false),
       isVisible: isActiveCellPending
     });
-
-    notebookTracker.activeCellChanged.connect(notifyToolbar);
-    notebookTracker.currentChanged.connect(notifyToolbar);
 
     // Fetch this plugin's schema into the frontend settings registry. The
     // notebook toolbar factory aggregates `jupyter.lab.toolbars.Cell`

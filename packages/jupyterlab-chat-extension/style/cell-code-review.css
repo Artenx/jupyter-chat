@@ -1,12 +1,42 @@
-/* Keep the review controls distinct from the default cell toolbar actions. */
-.jp-chat-cell-review-accept {
-  color: var(--jp-ui-inverse-font-color1) !important;
-  background-color: var(--jp-success-color1) !important;
-  border-radius: 4px;
+/*
+ * Bottom-of-cell review bar shown while a chat code replacement is pending.
+ * Two icon buttons: a green check (accept) and a red cross (reject), each with
+ * a hover tooltip describing the action.
+ */
+.jp-chat-cell-review-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px 4px;
 }
 
-.jp-chat-cell-review-reject {
-  color: var(--jp-ui-inverse-font-color1) !important;
-  background-color: var(--jp-error-color1) !important;
+.jp-chat-cell-review-bar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
   border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.jp-chat-cell-review-bar button:hover {
+  background: var(--jp-layout-color2);
+}
+
+.jp-chat-cell-review-bar svg {
+  width: 16px;
+  height: 16px;
+}
+
+.jp-chat-cell-review-bar-accept {
+  color: var(--jp-success-color2, #2f9e44);
+}
+
+.jp-chat-cell-review-bar-reject {
+  color: var(--jp-error-color1);
 }

@@ -10,18 +10,7 @@
   },
   "additionalProperties": false,
   "jupyter.lab.toolbars": {
-    "Cell": [
-      {
-        "name": "accept-cell-code",
-        "command": "toolbar-button:chat-accept-cell-code",
-        "rank": 1
-      },
-      {
-        "name": "reject-cell-code",
-        "command": "toolbar-button:chat-reject-cell-code",
-        "rank": 2
-      }
-    ],
+    "Cell": [],
     "Notebook": []
   }
 }
