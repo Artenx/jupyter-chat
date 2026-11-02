@@ -68,7 +68,7 @@
 
 .jp-chat-input-reactive-toolbar::part(positioning-region) {
   flex-flow: row nowrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: var(--jp-cell-padding, 8px);
 }
 
