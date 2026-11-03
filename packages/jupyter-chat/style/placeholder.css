@@ -3,13 +3,24 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+/* The placeholder widget node must participate in the side panel flex
+ * column exactly like an opened chat widget does (grow + shrink to the
+ * available height), otherwise the content height wins and the list below
+ * can never overflow into a scroll area. */
+.jp-chat-placeholder-widget {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .jp-chat-placeholder {
   text-align: center;
   color: var(--jp-content-font-color2);
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  height: 100%;
+  flex: 1 1 auto;
   min-height: 0;
   padding: 8px;
 }

@@ -21,6 +21,9 @@ import type { MultiChatPanel } from './multichat-panel';
 export class defaultPlaceholder extends ReactWidget {
   constructor(options: Placeholder.IProps) {
     super();
+    // The side panel is a flex column; without this class the widget keeps
+    // its content height and a long chat list overflows without scrolling.
+    this.addClass('jp-chat-placeholder-widget');
     this._props = options;
   }
 
