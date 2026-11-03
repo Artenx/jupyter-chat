@@ -15,17 +15,25 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   border: none;
-  border-radius: 4px;
-  background: transparent;
+  border-radius: 6px;
+  color: #fff;
   cursor: pointer;
+  box-shadow: var(--jp-elevation-z2);
+  transition:
+    filter 0.1s ease,
+    transform 0.05s ease;
 }
 
 .jp-chat-cell-review-bar button:hover {
-  background: var(--jp-layout-color2);
+  filter: brightness(1.1);
+}
+
+.jp-chat-cell-review-bar button:active {
+  transform: scale(0.94);
 }
 
 .jp-chat-cell-review-bar svg {
@@ -34,9 +42,9 @@
 }
 
 .jp-chat-cell-review-bar-accept {
-  color: var(--jp-success-color2, #2f9e44);
+  background: var(--jp-success-color1);
 }
 
 .jp-chat-cell-review-bar-reject {
-  color: var(--jp-error-color1);
+  background: var(--jp-error-color1);
 }

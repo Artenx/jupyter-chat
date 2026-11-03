@@ -244,10 +244,13 @@ export function ChatMessages(): JSX.Element {
                 sx={{
                   ...(isCurrentUser && {
                     marginLeft: area === 'main' ? '25%' : '10%',
-                    backgroundColor: 'var(--jp-layout-color2)',
-                    border: 'none',
-                    borderRadius: 2,
-                    padding: 2
+                    backgroundColor:
+                      'color-mix(in srgb, var(--jp-brand-color1) 10%, var(--jp-layout-color1))',
+                    border:
+                      '1px solid color-mix(in srgb, var(--jp-brand-color1) 22%, transparent)',
+                    borderRadius: 3,
+                    padding: 2,
+                    boxShadow: '0 1px 2px rgb(0 0 0 / 6%)'
                   })
                 }}
                 className={clsx(
