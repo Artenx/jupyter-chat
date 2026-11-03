@@ -71,7 +71,9 @@
   overflow: auto;
   white-space: pre;
   margin: 0;
-  padding: 6px 8px;
+  /* Extra bottom padding keeps the horizontal scrollbar from overlapping
+   * the last line of code (the scrollbar renders inside the padding box). */
+  padding: 6px 8px 14px;
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   border-radius: 4px;
   /* Long code blocks and tracebacks scroll inside their own area instead
