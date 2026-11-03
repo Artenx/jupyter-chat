@@ -13,6 +13,7 @@ import { ISignal } from '@lumino/signaling';
 import React, { useEffect, useState } from 'react';
 
 import { useTranslator } from '../context';
+import type { MultiChatPanel } from './multichat-panel';
 
 /**
  * The default placeholder widget.
@@ -41,7 +42,7 @@ export namespace Placeholder {
     /**
      * The initial chat names.
      */
-    chatNames: { [name: string]: string };
+    chatNames: { [name: string]: MultiChatPanel.IChatFileEntry };
     /**
      * A callback to open an existing chat by name.
      *
@@ -55,7 +56,7 @@ export namespace Placeholder {
     /**
      * An optional signal emitting when the chat list changes.
      */
-    chatNamesChanged?: ISignal<any, { [name: string]: string }>;
+    chatNamesChanged?: ISignal<any, { [name: string]: MultiChatPanel.IChatFileEntry }>;
     /**
      * An optional translation bundle.
      */
@@ -69,7 +70,7 @@ export namespace Placeholder {
 const PlaceholderComponent = (props: Placeholder.IProps): JSX.Element => {
   const trans = props.trans ?? useTranslator();
 
-  const [chatNames, setChatNames] = useState<{ [name: string]: string }>(
+  const [chatNames, setChatNames] = useState<{ [name: string]: MultiChatPanel.IChatFileEntry }>(
     props.chatNames
   );
 
@@ -77,7 +78,7 @@ const PlaceholderComponent = (props: Placeholder.IProps): JSX.Element => {
     if (!props.chatNamesChanged) {
       return;
     }
-    const onChanged = (_: any, names: { [name: string]: string }) => {
+    const onChanged = (_: any, names: { [name: string]: MultiChatPanel.IChatFileEntry }) => {
       setChatNames(names);
     };
     props.chatNamesChanged.connect(onChanged);
@@ -86,7 +87,23 @@ const PlaceholderComponent = (props: Placeholder.IProps): JSX.Element => {
     };
   }, [props.chatNamesChanged]);
 
-  const names = Object.keys(chatNames).sort((a, b) => a.localeCompare(b));
+  // Newest chats first so they are always reachable at the top of the
+  // list; fall back to name order when timestamps are missing or equal.
+  const names = Object.keys(chatNames).sort((a, b) => {
+    const ta = chatNames[a]?.lastModified;
+    const tb = chatNames[b]?.lastModified;
+    if (ta && tb) {
+      const delta = Date.parse(tb) - Date.parse(ta);
+      if (delta !== 0) {
+        return delta;
+      }
+    } else if (ta) {
+      return -1;
+    } else if (tb) {
+      return 1;
+    }
+    return a.localeCompare(b);
+  });
 
   return (
     <div className="jp-chat-placeholder">
@@ -109,6 +126,7 @@ const PlaceholderComponent = (props: Placeholder.IProps): JSX.Element => {
             <div key={name}>
               <button
                 className="jp-chat-placeholder-chat-item"
+                title={name}
                 onClick={() => props.open(name)}
               >
                 {name}

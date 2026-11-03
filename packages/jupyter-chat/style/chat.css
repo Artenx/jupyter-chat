@@ -20,6 +20,22 @@
   overflow-x: auto;
 }
 
+/* Long words and URLs must wrap instead of forcing horizontal scroll. */
+.jp-chat-rendered-message .jp-RenderedHTMLCommon {
+  overflow-wrap: anywhere;
+}
+
+/* Markdown tables and images stay within the message width. */
+.jp-chat-rendered-message .jp-RenderedMarkdown table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.jp-chat-rendered-message .jp-RenderedMarkdown img {
+  max-width: 100%;
+}
+
 .jp-chat-rendered-message hr {
   color: #00000026;
   background-color: transparent;
@@ -52,11 +68,15 @@
 .jp-ThemedContainer .jp-chat-rendered-message .jp-RenderedMarkdown pre,
 .jp-ThemedContainer .jp-chat-welcome-message .jp-RenderedMarkdown pre {
   background-color: var(--jp-cell-editor-background);
-  overflow-x: auto;
+  overflow: auto;
   white-space: pre;
   margin: 0;
-  padding: 4px 6px;
+  padding: 6px 8px;
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border-radius: 4px;
+  /* Long code blocks and tracebacks scroll inside their own area instead
+   * of flooding the conversation. */
+  max-height: 360px;
 }
 
 .jp-ThemedContainer .jp-RenderedMarkdown pre > code {

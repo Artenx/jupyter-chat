@@ -434,7 +434,7 @@ export class MultiChatPanel extends PanelWithToolbar {
     };
     // If not, create the model.
     if (!openChatArgs.model && this._createModel) {
-      const chatID = this._chatNames[name];
+      const chatID = this._chatNames[name]?.path;
       openChatArgs = await this._createModel(chatID);
     }
     if (openChatArgs.model) {
@@ -446,7 +446,7 @@ export class MultiChatPanel extends PanelWithToolbar {
   private _chatOpened = new Signal<MultiChatPanel, IChatPanel>(this);
   private _chatNamesChanged = new Signal<
     MultiChatPanel,
-    { [name: string]: string }
+    { [name: string]: MultiChatPanel.IChatFileEntry }
   >(this);
   private _chatOptions: Omit<Chat.IOptions, 'model' | 'inputToolbarRegistry'>;
   private _inputToolbarFactory?: IInputToolbarRegistryFactory;
@@ -458,14 +458,14 @@ export class MultiChatPanel extends PanelWithToolbar {
   private _createModel?: (
     name?: string
   ) => Promise<MultiChatPanel.IOpenChatArgs>;
-  private _getChatNames?: () => Promise<{ [name: string]: string }>;
+  private _getChatNames?: () => Promise<{ [name: string]: MultiChatPanel.IChatFileEntry }>;
   private _renameChat?: boolean | ((oldName: string) => Promise<string | null>);
   private _placeholderFactory?: IChatPlaceholderFactory;
   private _openChatWidget?: ReactWidget;
   private _chatSelectorPopup?: ChatSelectorPopup;
   private _loadedModels: Map<string, IChatModel> = new Map();
   private _currentWidget?: SidePanelWidget | Widget;
-  private _chatNames: { [name: string]: string } = {};
+  private _chatNames: { [name: string]: MultiChatPanel.IChatFileEntry } = {};
   private _visibilityChanged = new Signal<MultiChatPanel, boolean>(this);
   private _trans: TranslationBundle;
 }
@@ -474,6 +474,20 @@ export class MultiChatPanel extends PanelWithToolbar {
  * The chat panel namespace.
  */
 export namespace MultiChatPanel {
+  /**
+   * Information about a chat file available to open.
+   */
+  export interface IChatFileEntry {
+    /**
+     * The path of the chat file.
+     */
+    path: string;
+    /**
+     * The ISO last-modified timestamp of the chat file, if known.
+     */
+    lastModified: string | null;
+  }
+
   /**
    * Options of the constructor of the chat panel.
    */
@@ -500,9 +514,9 @@ export namespace MultiChatPanel {
     /**
      * An optional callback to get the list of existing chats.
      *
-     * @returns an object mapping chat display names to identifiers.
+     * @returns an object mapping chat display names to chat file entries.
      */
-    getChatNames?: () => Promise<{ [name: string]: string }>;
+    getChatNames?: () => Promise<{ [name: string]: IChatFileEntry }>;
     /**
      * An optional callback to rename a chat.
      *
